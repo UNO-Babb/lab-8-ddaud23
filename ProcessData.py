@@ -7,38 +7,67 @@ import random
 
 def main():
 
-  #Open the files we will be using
-
+  # Open the files we will be using
   inFile = open("names.dat", 'r')
   outFile = open("StudentList.csv", 'w')
 
-
-  #Process each line of the input file and output to the CSV file
-  #line = inFile.readline()
+  # Process each line of the input file and output to the CSV file
   for line in inFile:
-    data = line.split()
-    first = data[0]
-    last = data[1]
-    school_year = data[3]
-    major = data[4]
-    idNum = data[3]
+    data = line.strip().split()
 
-    school_year_str = makeSchoolYear(school_year)
-    major_abbr = makeMajor(major)
+    # Skip lines that don't have enough data
+    if len(data) < 7:
+      print("Skipping invalid line:", line.strip())
+      continue
 
-    output = last + "," + first + "," + school_year_str + "," + major_abbr + "\n"
-    outFile. write(output)
-    print(school_year_str, major_abbr)
+    
+    first = data[0]        
+    last = data[1]         
+    studentID = data[3]  
+    year = data[5]        
+    major = data[6]        
 
-  #Close files in the end to save and ensure they are not damaged.
+    # Generate UserID and Major-Year
+    user_id = makeID(first, last, studentID)
+    major_year = makeMajorYear(major, year)
+
+    # Write the formatted output line
+    output = last + "," + first + "," + user_id + "," + major_year + "\n"
+    outFile.write(output)
+    print(output.strip())
+
+  # Close files to save and prevent corruption
   inFile.close()
   outFile.close()
 
-def makeSchoolYear(year):
-  return year.capatalize()
-
-def makeMajor(major):
-  return major[3:].capatalize()
+def makeID(first, last, num):
   
+  if len(last) < 5:
+    last = last + "xxxxx"
+  last = last[0:5]
+
+  # Use first initial + last name (5 chars) + last 3 digits of student ID
+  last3 = num[-3:]
+  id = first[0].lower() + last.lower() + last3
+  return id
+
+def makeMajorYear(major, year):
+  first3 = major[0:3].upper()
+  year = year.upper()
+  
+  yearAb = "GR"
+  if year == "FRESHMAN":
+    yearAb = "FR"
+  elif year == "SOPHOMORE":
+    yearAb = "SO"
+  elif year == "JUNIOR":
+    yearAb = "JR"
+  elif year == "SENIOR":
+    yearAb = "SR"
+
+  majorYear = first3 + "-" + yearAb
+  return majorYear
+
 if __name__ == '__main__':
   main()
+
